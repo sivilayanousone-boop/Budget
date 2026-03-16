@@ -5,25 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kob's Budget Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Noto Sans Lao', sans-serif; }
         .spending-card { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); }
-        .tab-active { background: #2563eb; color: white; box-shadow: 0 4px 12px rgba(37,99,235,0.3); }
+        .tab-active   { background: #2563eb; color: white; box-shadow: 0 4px 12px rgba(37,99,235,0.3); }
         .tab-inactive { background: #f1f5f9; color: #64748b; }
-        .modal-enter { animation: slideUp 0.28s cubic-bezier(.22,.68,0,1.2); }
-        @keyframes slideUp { from { transform: translateY(50px) scale(0.97); opacity:0; } to { transform: translateY(0) scale(1); opacity:1; } }
-        @keyframes confetti { 0%{transform:translateY(0) rotate(0);opacity:1} 100%{transform:translateY(-80px) rotate(720deg);opacity:0} }
-        .confetti-piece { animation: confetti 0.9s ease-out forwards; position:absolute; width:8px; height:8px; border-radius:2px; }
-        input[type=number]::-webkit-outer-spin-button,
-        input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        .plan-card { border-left: 3px solid #3b82f6; }
-        .plan-card.warning { border-left-color: #f59e0b; }
-        .plan-card.danger { border-left-color: #ef4444; }
-        .plan-card.success { border-left-color: #10b981; }
-        .filter-active { background: rgba(255,255,255,0.25) !important; border: 1px solid rgba(255,255,255,0.4); }
+        .modal-enter  { animation: slideUp 0.28s cubic-bezier(.22,.68,0,1.2); }
+        @keyframes slideUp { from{transform:translateY(50px) scale(.97);opacity:0} to{transform:translateY(0) scale(1);opacity:1} }
+        @keyframes confetti { 0%{transform:translateY(0) rotate(0);opacity:1} 100%{transform:translateY(-90px) rotate(720deg);opacity:0} }
+        .confetti-piece { animation:confetti .9s ease-out forwards; position:absolute; width:8px; height:8px; border-radius:2px; }
+        .plan-card         { border-left:3px solid #3b82f6; }
+        .plan-card.warning { border-left-color:#f59e0b; }
+        .plan-card.danger  { border-left-color:#ef4444; }
+        .plan-card.success { border-left-color:#10b981; }
+        .filter-active { background:rgba(255,255,255,0.28) !important; border:1px solid rgba(255,255,255,0.5) !important; }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen pb-28 text-slate-800">
@@ -51,10 +48,11 @@
             <span class="text-2xl">📊</span>
         </button>
     </div>
+    <!-- Date Filter -->
     <div class="mt-4 flex gap-2">
-        <button onclick="setFilter('week')" id="f-week" class="flex-1 text-[10px] font-bold py-1.5 rounded-full bg-white/10 hover:bg-white/20 transition uppercase tracking-wider">ອາທິດນີ້</button>
-        <button onclick="setFilter('month')" id="f-month" class="flex-1 text-[10px] font-bold py-1.5 rounded-full bg-white/10 hover:bg-white/20 transition uppercase tracking-wider">ເດືອນນີ້</button>
-        <button onclick="setFilter('all')" id="f-all" class="flex-1 text-[10px] font-bold py-1.5 rounded-full bg-white/10 hover:bg-white/20 transition uppercase tracking-wider">ທັງໝົດ</button>
+        <button onclick="setFilter('week')"  id="f-week"  class="flex-1 text-[10px] font-bold py-1.5 rounded-full bg-white/10 hover:bg-white/20 transition uppercase tracking-wider border border-transparent">ອາທິດນີ້</button>
+        <button onclick="setFilter('month')" id="f-month" class="flex-1 text-[10px] font-bold py-1.5 rounded-full bg-white/10 hover:bg-white/20 transition uppercase tracking-wider border border-transparent">ເດືອນນີ້</button>
+        <button onclick="setFilter('all')"   id="f-all"   class="flex-1 text-[10px] font-bold py-1.5 rounded-full bg-white/10 hover:bg-white/20 transition uppercase tracking-wider border border-transparent">ທັງໝົດ</button>
     </div>
     <div class="absolute -right-10 -bottom-10 w-44 h-44 bg-white opacity-10 rounded-full blur-2xl"></div>
 </header>
@@ -63,12 +61,12 @@
 <div class="max-w-md mx-auto px-4 mt-4">
     <div class="flex gap-2 bg-slate-100 p-1.5 rounded-2xl">
         <button onclick="switchTab('budget')" id="tab-budget" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all tab-active">💰 ງົບ</button>
-        <button onclick="switchTab('ai')" id="tab-ai" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all tab-inactive">✨ AI</button>
-        <button onclick="switchTab('split')" id="tab-split" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all tab-inactive">🤝 ແບ່ງບິນ</button>
+        <button onclick="switchTab('ai')"     id="tab-ai"     class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all tab-inactive">✨ AI</button>
+        <button onclick="switchTab('split')"  id="tab-split"  class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all tab-inactive">🤝 ແບ່ງບິນ</button>
     </div>
 </div>
 
-<!-- BUDGET TAB -->
+<!-- ═══ BUDGET TAB ═══ -->
 <div id="page-budget" class="max-w-md mx-auto p-4 space-y-5">
     <div>
         <h3 class="font-bold text-slate-500 ml-1 mb-3 text-[10px] uppercase tracking-widest">🎯 ເປົ້າໝາຍທ້ອນ</h3>
@@ -87,7 +85,7 @@
     </div>
 </div>
 
-<!-- AI TAB -->
+<!-- ═══ AI TAB ═══ -->
 <div id="page-ai" class="max-w-md mx-auto p-4 space-y-4 hidden">
     <div class="grid grid-cols-2 gap-3">
         <button onclick="runAI('summary')" class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 text-left hover:border-blue-200 hover:shadow-md transition active:scale-95">
@@ -112,11 +110,12 @@
         </button>
     </div>
 
+    <!-- Spending Plan -->
     <div class="bg-white rounded-2xl shadow-sm border border-blue-100 overflow-hidden">
         <div class="p-4 flex justify-between items-center border-b border-slate-50">
             <div>
                 <p class="font-bold text-slate-700 text-sm">📝 ແຜນການໃຊ້ຈ່າຍເດືອນໜ້າ</p>
-                <p class="text-[10px] text-slate-400 mt-0.5">AI ແນະນຳໂດຍອີງໃສ່ປະຫວັດຂອງທ່ານ</p>
+                <p class="text-[10px] text-slate-400 mt-0.5">AI ແນະນຳໂດຍອີງໃສ່ປະຫວັດ</p>
             </div>
             <button onclick="runAI('plan')" class="bg-blue-600 text-white text-xs font-bold px-4 py-2 rounded-xl hover:bg-blue-700 transition">ສ້າງແຜນ</button>
         </div>
@@ -126,6 +125,7 @@
         </div>
     </div>
 
+    <!-- AI Result -->
     <div id="aiResultBox" class="hidden bg-white rounded-2xl shadow-sm border border-purple-100 p-5">
         <div class="flex justify-between items-center mb-3">
             <p id="aiResultTitle" class="font-bold text-slate-700 text-sm"></p>
@@ -134,6 +134,7 @@
         <div id="aiResultContent" class="text-sm text-slate-600 leading-relaxed space-y-1"></div>
     </div>
 
+    <!-- Loader -->
     <div id="aiLoader" class="hidden bg-white rounded-2xl p-6 flex flex-col items-center gap-3 shadow-sm">
         <div class="flex gap-1.5">
             <div class="w-2.5 h-2.5 bg-blue-400 rounded-full animate-bounce"></div>
@@ -144,7 +145,7 @@
     </div>
 </div>
 
-<!-- SPLIT TAB -->
+<!-- ═══ SPLIT TAB ═══ -->
 <div id="page-split" class="max-w-md mx-auto p-4 space-y-4 hidden">
     <button onclick="openNewSplitModal()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-200 hover:bg-blue-700 transition active:scale-95 flex items-center justify-center gap-2">
         <span class="text-xl">+</span> ສ້າງບິນໃໝ່
@@ -194,10 +195,10 @@
                 oninput="formatAmountInput(this)"
                 class="w-full mt-1 p-4 bg-slate-50 rounded-2xl ring-1 ring-slate-100 text-3xl font-bold text-blue-600 focus:ring-2 focus:ring-blue-500 outline-none tracking-wide">
             <div class="flex gap-2 mt-2">
-                <button onclick="quickAmount(10000)"  class="flex-1 text-[10px] font-bold py-2 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition">10K</button>
-                <button onclick="quickAmount(50000)"  class="flex-1 text-[10px] font-bold py-2 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition">50K</button>
-                <button onclick="quickAmount(100000)" class="flex-1 text-[10px] font-bold py-2 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition">100K</button>
-                <button onclick="quickAmount(500000)" class="flex-1 text-[10px] font-bold py-2 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition">500K</button>
+                <button onclick="quickAmount(10000)"   class="flex-1 text-[10px] font-bold py-2 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition">10K</button>
+                <button onclick="quickAmount(50000)"   class="flex-1 text-[10px] font-bold py-2 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition">50K</button>
+                <button onclick="quickAmount(100000)"  class="flex-1 text-[10px] font-bold py-2 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition">100K</button>
+                <button onclick="quickAmount(500000)"  class="flex-1 text-[10px] font-bold py-2 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition">500K</button>
                 <button onclick="quickAmount(1000000)" class="flex-1 text-[10px] font-bold py-2 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition">1M</button>
             </div>
         </div>
@@ -247,37 +248,45 @@
 </div>
 
 <script>
-const SUPABASE_URL = 'https://hiztwnivfoqzpjmzlkja.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhpenR3bml2Zm9xenBqbXpsa2phIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0Mzg3MTAsImV4cCI6MjA4OTAxNDcxMH0.SA-FW18eSzvAcWKvW6VCy5Agi_uttjBWDbVrUUxnZVs';
-const GEMINI_KEY  = 'AIzaSyCPChRbGrKa32dAN3qO2s0JAgqiSNdbc40';
-const { createClient } = supabase;
-const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+// ── Storage (localStorage) ──────────────────────────────────────────
+const LS = {
+    get: (k, def=[]) => { try { return JSON.parse(localStorage.getItem(k)) ?? def; } catch { return def; } },
+    set: (k, v)      => localStorage.setItem(k, JSON.stringify(v))
+};
 
-let userId = localStorage.getItem('kob_user_id');
-if (!userId) { userId = 'user_' + Math.random().toString(36).slice(2,11); localStorage.setItem('kob_user_id', userId); }
+// ── State ───────────────────────────────────────────────────────────
+let transactions  = LS.get('kob_tx',    []);
+let splitBills    = LS.get('kob_split', []);
+let currentFilter = 'month';
+let currentPlan   = null;
+let chartInstance = null;
+let participantCount = 0;
 
-let transactions = [], splitBills = [], chartInstance = null, currentFilter = 'month', currentPlan = null, participantCount = 0;
+const GEMINI_KEY = 'AIzaSyCPChRbGrKa32dAN3qO2s0JAgqiSNdbc40';
 
 const goals = [
-    { name:'ສຸກເສີນ (Emergency)', target:10000000, cat:'ທ້ອນ-ສຸກເສີນ', icon:'🚑', color:'bg-rose-500' },
-    { name:'ຫູຟັງ (Headphones)',   target:3000000,  cat:'ທ້ອນ-ຫູຟັງ',    icon:'🎧', color:'bg-purple-500' },
-    { name:'ທ່ອງທ່ຽວ (Travel)',    target:20000000, cat:'ທ້ອນ-ການທ່ອງທ່ຽວ', icon:'✈️', color:'bg-orange-500' }
+    { name:'ສຸກເສີນ (Emergency)', target:10000000, cat:'ທ້ອນ-ສຸກເສີນ',      icon:'🚑', color:'bg-rose-500'   },
+    { name:'ຫູຟັງ (Headphones)',   target:3000000,  cat:'ທ້ອນ-ຫູຟັງ',         icon:'🎧', color:'bg-purple-500' },
+    { name:'ທ່ອງທ່ຽວ (Travel)',    target:20000000, cat:'ທ້ອນ-ການທ່ອງທ່ຽວ',  icon:'✈️', color:'bg-orange-500' }
 ];
 const categories = {
     income:  ['ເງິນເດືອນ','ເງິນພາກສະໜາມ','ໝູ່ຈ່າຍຄືນ','ລາຍຮັບອື່ນໆ'],
     expense: ['ອາຫານຫຼັກ','ກິນດື່ມ/ສັງສັນ','ຂອງກິນຢາກ','ຜ່ອນໂທລະສັບ','ຄ່າເນັດ','ໃຊ້ໜີ້ແມ່','ທ້ອນ-ສຸກເສີນ','ທ້ອນ-ຫູຟັງ','ທ້ອນ-ການທ່ອງທ່ຽວ','ອື່ນໆ']
 };
 
-// ── Formatting ──────────────────────────────────────────────────────
+// ── Helpers ─────────────────────────────────────────────────────────
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
 function fmt(n) { return Math.round(Number(n)||0).toLocaleString('en-US'); }
 function parse(s) { return parseFloat((s||'').replace(/,/g,'')) || 0; }
+function saveTx()    { LS.set('kob_tx',    transactions); }
+function saveSplit() { LS.set('kob_split', splitBills);   }
+
 function formatAmountInput(el) {
-    const pos = el.selectionStart, oldLen = el.value.length;
     const raw = el.value.replace(/[^0-9]/g,'');
     if (!raw) { el.value = ''; return; }
+    const pos = el.selectionStart, oldLen = el.value.length;
     el.value = Number(raw).toLocaleString('en-US');
-    const newLen = el.value.length;
-    try { el.setSelectionRange(pos + (newLen - oldLen), pos + (newLen - oldLen)); } catch(e){}
+    try { const d = el.value.length - oldLen; el.setSelectionRange(pos+d, pos+d); } catch(e){}
 }
 function quickAmount(n) { document.getElementById('amountDisplay').value = n.toLocaleString('en-US'); }
 
@@ -286,44 +295,36 @@ function setFilter(f) {
     currentFilter = f;
     ['week','month','all'].forEach(x => {
         const b = document.getElementById('f-'+x);
-        b.className = b.className.replace(' filter-active','');
-        if (x===f) b.className += ' filter-active';
+        b.classList.remove('filter-active');
+        if (x===f) b.classList.add('filter-active');
     });
     renderBudget();
 }
 function filterTx() {
     const now = new Date();
     return transactions.filter(t => {
-        const d = new Date(t.created_at);
+        const d = new Date(t.date);
         if (currentFilter==='week')  { const w=new Date(now); w.setDate(now.getDate()-7); return d>=w; }
         if (currentFilter==='month') return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
         return true;
     });
 }
 
-// ── Load ─────────────────────────────────────────────────────────────
-async function loadTransactions() {
-    const { data } = await db.from('transactions').select('*').eq('user_id',userId).order('created_at',{ascending:false});
-    transactions = data||[]; renderBudget();
-}
-async function loadSplitBills() {
-    const { data } = await db.from('split_bills').select('*, split_participants(*)').eq('user_id',userId).order('created_at',{ascending:false});
-    splitBills = data||[]; renderSplit();
-}
-
-// ── Render Budget ─────────────────────────────────────────────────────
+// ── Render Budget ────────────────────────────────────────────────────
 function renderBudget() {
     const filtered = filterTx();
     let income=0, expense=0;
-    filtered.forEach(t => { const a=Number(t.amount)||0; t.type==='income'?income+=a:expense+=a; });
+    filtered.forEach(t => { const a=Number(t.amount)||0; t.type==='income' ? income+=a : expense+=a; });
 
+    // Goals always use ALL transactions
     const savings = {'ທ້ອນ-ສຸກເສີນ':0,'ທ້ອນ-ຫູຟັງ':0,'ທ້ອນ-ການທ່ອງທ່ຽວ':0};
-    transactions.forEach(t => { if(t.type==='expense'&&savings[t.category]!==undefined) savings[t.category]+=Number(t.amount)||0; });
+    transactions.forEach(t => { if(t.type==='expense' && savings[t.category]!==undefined) savings[t.category]+=Number(t.amount)||0; });
 
     document.getElementById('spendingBalance').innerText = fmt(income-expense)+' ກີບ';
-    document.getElementById('totalIncome').innerText    = fmt(income);
-    document.getElementById('totalExpense').innerText   = fmt(expense);
+    document.getElementById('totalIncome').innerText     = fmt(income);
+    document.getElementById('totalExpense').innerText    = fmt(expense);
 
+    // Goals
     document.getElementById('goalList').innerHTML = goals.map(g => {
         const saved=savings[g.cat]||0, pct=Math.min((saved/g.target)*100,100).toFixed(0);
         return `<div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-50 flex items-center gap-4">
@@ -341,11 +342,12 @@ function renderBudget() {
         </div>`;
     }).join('');
 
+    // History
     const list=document.getElementById('historyList'), empty=document.getElementById('emptyHistory');
     if (!filtered.length) { list.innerHTML=''; empty.classList.remove('hidden'); return; }
     empty.classList.add('hidden');
-    list.innerHTML = filtered.slice(0,30).map(t=>`
-        <div onclick="openEditModal('${t.id}','${(t.description||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;')}','${t.type}','${t.category}',${t.amount})"
+    list.innerHTML = [...filtered].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,30).map(t => `
+        <div onclick='openEditModal(${JSON.stringify(t.id)},${JSON.stringify(t.description)},${JSON.stringify(t.type)},${JSON.stringify(t.category)},${t.amount})'
             class="bg-white p-4 rounded-2xl flex justify-between items-center shadow-sm hover:shadow-md transition cursor-pointer border border-transparent hover:border-blue-100 active:scale-[0.98]">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl flex items-center justify-center text-base flex-shrink-0 ${t.type==='income'?'bg-emerald-50 text-emerald-600':'bg-rose-50 text-rose-600'}">${t.type==='income'?'↓':'↑'}</div>
@@ -358,42 +360,54 @@ function renderBudget() {
         </div>`).join('');
 }
 
-// ── Transaction CRUD ──────────────────────────────────────────────────
-async function saveTransaction() {
-    const id=document.getElementById('editId').value;
-    const amt=parse(document.getElementById('amountDisplay').value);
-    if (amt<=0) { document.getElementById('amountDisplay').focus(); return; }
-    const data={ user_id:userId, description:document.getElementById('desc').value||'ບໍ່ລະບຸ', type:document.getElementById('type').value, category:document.getElementById('category').value, amount:amt };
-    if (id) await db.from('transactions').update(data).eq('id',id);
-    else    await db.from('transactions').insert(data);
-    closeModal(); loadTransactions();
+// ── Transaction CRUD ─────────────────────────────────────────────────
+function saveTransaction() {
+    const id  = document.getElementById('editId').value;
+    const amt = parse(document.getElementById('amountDisplay').value);
+    if (amt <= 0) { document.getElementById('amountDisplay').focus(); return; }
+    const entry = {
+        id:          id || uid(),
+        description: document.getElementById('desc').value || 'ບໍ່ລະບຸ',
+        type:        document.getElementById('type').value,
+        category:    document.getElementById('category').value,
+        amount:      amt,
+        date:        id ? (transactions.find(t=>t.id===id)?.date || new Date().toISOString()) : new Date().toISOString()
+    };
+    if (id) transactions = transactions.map(t => t.id===id ? entry : t);
+    else    transactions.unshift(entry);
+    saveTx(); closeModal(); renderBudget();
 }
-async function deleteTransaction() {
-    const id=document.getElementById('editId').value;
-    if (id&&confirm('ລຶບລາຍການນີ້ແທ້ບໍ?')) { await db.from('transactions').delete().eq('id',id); closeModal(); loadTransactions(); }
+function deleteTransaction() {
+    const id = document.getElementById('editId').value;
+    if (id && confirm('ລຶບລາຍການນີ້ແທ້ບໍ?')) {
+        transactions = transactions.filter(t => t.id !== id);
+        saveTx(); closeModal(); renderBudget();
+    }
 }
 
 // ── CSV Export ────────────────────────────────────────────────────────
 function exportCSV() {
-    const f=filterTx();
+    const f = filterTx();
     if (!f.length) { alert('ບໍ່ມີຂໍ້ມູນ'); return; }
-    const rows=[['ວັນທີ','ລາຍລະອຽດ','ປະເພດ','ໝວດໝູ່','ຈຳນວນ (ກີບ)']];
-    f.forEach(t=>rows.push([new Date(t.created_at).toLocaleDateString('lo-LA'),t.description||'',t.type==='income'?'ລາຍຮັບ':'ລາຍຈ່າຍ',t.category||'',t.amount||0]));
-    const csv=rows.map(r=>r.map(c=>`"${c}"`).join(',')).join('\n');
-    const a=document.createElement('a');
-    a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));
-    a.download=`budget_${currentFilter}_${new Date().toISOString().slice(0,10)}.csv`;
+    const rows = [['ວັນທີ','ລາຍລະອຽດ','ປະເພດ','ໝວດໝູ່','ຈຳນວນ (ກີບ)']];
+    [...f].sort((a,b)=>new Date(b.date)-new Date(a.date)).forEach(t =>
+        rows.push([new Date(t.date).toLocaleDateString('lo-LA'), t.description||'', t.type==='income'?'ລາຍຮັບ':'ລາຍຈ່າຍ', t.category||'', t.amount||0])
+    );
+    const csv = rows.map(r => r.map(c=>`"${c}"`).join(',')).join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));
+    a.download = `budget_${currentFilter}_${new Date().toISOString().slice(0,10)}.csv`;
     a.click();
 }
 
 // ── Gemini AI ─────────────────────────────────────────────────────────
 async function callGemini(prompt, system) {
-    const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,{
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,{
         method:'POST', headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({ contents:[{parts:[{text:prompt}]}], systemInstruction:{parts:[{text:system}]} })
+        body: JSON.stringify({ contents:[{parts:[{text:prompt}]}], systemInstruction:{parts:[{text:system}]} })
     });
-    const d=await r.json();
-    return d.candidates?.[0]?.content?.parts?.[0]?.text||'AI ບໍ່ຕອບສະໜອງ';
+    const d = await r.json();
+    return d.candidates?.[0]?.content?.parts?.[0]?.text || 'AI ບໍ່ຕອບສະໜອງ';
 }
 function buildSummary() {
     const f=filterTx(); let income=0,expense=0; const catMap={};
@@ -411,20 +425,18 @@ async function runAI(type) {
     loader.classList.remove('hidden');
     document.getElementById('aiLoaderText').innerText = type==='plan'?'Gemini ກຳລັງສ້າງແຜນ...':'Gemini ກຳລັງວິເຄາະ...';
 
-    const txInfo=`ລາຍຮັບ:${fmt(s.income)}, ລາຍຈ່າຍ:${fmt(s.expense)}, ຄົງເຫຼືອ:${fmt(s.balance)} ກີບ. ລາຍຈ່າຍຕາມໝວດ:${JSON.stringify(s.catMap)}. ທ້ອນ:Emergency=${fmt(s.savings['ທ້ອນ-ສຸກເສີນ'])},Headphones=${fmt(s.savings['ທ້ອນ-ຫູຟັງ'])},Travel=${fmt(s.savings['ທ້ອນ-ການທ່ອງທ່ຽວ'])}.`;
-    const goalInfo='ເປົ້າ:Emergency=10M,Headphones=3M,Travel=20M ກີບ';
+    const txInfo=`ລາຍຮັບ:${fmt(s.income)}, ລາຍຈ່າຍ:${fmt(s.expense)}, ຄົງເຫຼືອ:${fmt(s.balance)} ກີບ. ລາຍຈ່າຍຕາມໝວດ:${JSON.stringify(s.catMap)}. ທ້ອນ: Emergency=${fmt(s.savings['ທ້ອນ-ສຸກເສີນ'])}, Headphones=${fmt(s.savings['ທ້ອນ-ຫູຟັງ'])}, Travel=${fmt(s.savings['ທ້ອນ-ການທ່ອງທ່ຽວ'])}.`;
+    const goalInfo='ເປົ້າ: Emergency=10M, Headphones=3M, Travel=20M ກີບ';
     const sysLao='ທ່ານເປັນທີ່ປຶກສາການເງິນ. ຕອບເປັນພາສາລາວ ສັ້ນ ຊັດ ມີປະໂຫຍດ. ໃຊ້ emoji ໃຫ້ພໍດີ.';
-
     const prompts={
-        summary:`${txInfo} ສະຫຼຸບລາຍຈ່າຍຕາມໝວດ ໝວດໃດຫຼາຍ/ໜ້ອຍສຸດ.`,
-        warning:`${txInfo} ໝວດໃດໃຊ້ຈ່າຍເກີນຄວນ? ມີຄວາມສ່ຽງ? ໃຫ້ຄຳແນະນຳ.`,
-        goal:`${txInfo} ${goalInfo} ທຳນາຍວ່າຈະບັນລຸແຕ່ລະເປົ້າໝາຍໃນກີ່ເດືອນ ອີງໃສ່ອັດຕາທ້ອນປັດຈຸບັນ.`,
-        timing:`${txInfo} ຄວນລະວັງໃຊ້ຈ່າຍຕອນໃດ ແລະ ຄວນທ້ອນຕອນໃດໃນເດືອນ?`,
-        plan:`${txInfo} ${goalInfo} ສ້າງແຜນງົບລາຍຈ່າຍເດືອນໜ້າ. ຕອບ JSON array ດຽວ: [{"category":"ຊື່","budget":ຕົວເລກ,"reason":"ສັ້ນ"}]. JSON ເທົ່ານັ້ນ ບໍ່ມີ markdown.`
+        summary: `${txInfo} ສະຫຼຸບລາຍຈ່າຍຕາມໝວດ ບອກໝວດໃດຫຼາຍ/ໜ້ອຍສຸດ.`,
+        warning: `${txInfo} ໝວດໃດໃຊ້ຈ່າຍເກີນ? ມີຄວາມສ່ຽງ? ໃຫ້ຄຳແນະນຳ.`,
+        goal:    `${txInfo} ${goalInfo} ທຳນາຍວ່າຈະບັນລຸແຕ່ລະເປົ້າໝາຍໃນກີ່ເດືອນ ອີງໃສ່ອັດຕາທ້ອນປັດຈຸບັນ.`,
+        timing:  `${txInfo} ຄວນລະວັງໃຊ້ຈ່າຍຕອນໃດ ແລະ ຄວນທ້ອນຕອນໃດໃນເດືອນ?`,
+        plan:    `${txInfo} ${goalInfo} ສ້າງແຜນງົບລາຍຈ່າຍເດືອນໜ້າ. ຕອບ JSON array ດຽວ: [{"category":"ຊື່","budget":ຕົວເລກ,"reason":"ສັ້ນ"}]. JSON ເທົ່ານັ້ນ.`
     };
-
     try {
-        const result=await callGemini(prompts[type], type==='plan'?'Return ONLY a valid JSON array with no markdown or extra text.':sysLao);
+        const result = await callGemini(prompts[type], type==='plan'?'Return ONLY a valid JSON array. No markdown or extra text.':sysLao);
         loader.classList.add('hidden');
         if (type==='plan') { renderPlan(result); return; }
         document.getElementById('aiResultTitle').innerText=aiTitles[type];
@@ -432,15 +444,14 @@ async function runAI(type) {
         resultBox.classList.remove('hidden');
     } catch(e) { loader.classList.add('hidden'); alert('ຜິດພາດ: '+e.message); }
 }
-
 function renderPlan(raw) {
     let plan=[];
     try { plan=JSON.parse(raw.replace(/```json|```/g,'').trim()); } catch(e) {
-        document.getElementById('planContainer').innerHTML='<p class="text-rose-500 text-sm">ອ່ານຂໍ້ມູນບໍ່ໄດ້ ລອງໃໝ່.</p>'; return;
+        document.getElementById('planContainer').innerHTML='<p class="text-rose-500 text-sm p-4">ອ່ານຂໍ້ມູນບໍ່ໄດ້ ລອງໃໝ່.</p>'; return;
     }
     currentPlan=plan;
     const s=buildSummary();
-    document.getElementById('planContainer').innerHTML=plan.map(item=>{
+    document.getElementById('planContainer').innerHTML = plan.map(item=>{
         const prev=s.catMap[item.category]||0, diff=item.budget-prev;
         const cls=diff<-50000?'danger':diff>50000?'success':'warning';
         const diffTxt=Math.abs(diff)<100?'ເທົ່າເດີມ':(diff>0?'+':'')+fmt(diff);
@@ -452,29 +463,27 @@ function renderPlan(raw) {
     }).join('');
     document.getElementById('applyPlanBtn').classList.remove('hidden');
 }
-
-async function applyPlan() {
-    if (!currentPlan?.length||!confirm('ເພີ່ມງົບ AI ເຂົ້າລາຍການ?')) return;
-    await db.from('transactions').insert(currentPlan.map(item=>({
-        user_id:userId, description:`[AI Plan] ${item.category}`, type:'expense', category:item.category, amount:item.budget
-    })));
-    loadTransactions(); fireConfetti(); alert('✅ ເພີ່ມແຜນ AI ແລ້ວ!');
+function applyPlan() {
+    if (!currentPlan?.length || !confirm('ເພີ່ມງົບ AI ເຂົ້າລາຍການ?')) return;
+    currentPlan.forEach(item => {
+        transactions.unshift({ id:uid(), description:`[AI Plan] ${item.category}`, type:'expense', category:item.category, amount:item.budget, date:new Date().toISOString() });
+    });
+    saveTx(); renderBudget(); fireConfetti(); alert('✅ ເພີ່ມແຜນ AI ແລ້ວ!');
 }
 
-// ── Confetti ───────────────────────────────────────────────────────────
+// ── Confetti ──────────────────────────────────────────────────────────
 function fireConfetti() {
     const c=document.getElementById('confettiContainer');
     const colors=['#3b82f6','#8b5cf6','#10b981','#f59e0b','#ef4444','#ec4899'];
     for(let i=0;i<28;i++){
-        const d=document.createElement('div');
-        d.className='confetti-piece';
+        const d=document.createElement('div'); d.className='confetti-piece';
         d.style.cssText=`left:${20+Math.random()*60}%;top:${35+Math.random()*25}%;background:${colors[i%6]};animation-delay:${Math.random()*0.4}s;animation-duration:${0.7+Math.random()*0.5}s`;
         c.appendChild(d); setTimeout(()=>d.remove(),1500);
     }
 }
 
 // ── Split Bills ────────────────────────────────────────────────────────
-function addParticipantRow(name='',amount='') {
+function addParticipantRow(name='', amount='') {
     participantCount++;
     const id='p_'+participantCount, row=document.createElement('div');
     row.id=id; row.className='flex gap-2 items-center';
@@ -485,7 +494,7 @@ function addParticipantRow(name='',amount='') {
         <input type="text" inputmode="numeric" placeholder="ກີບ" value="${amount?Number(amount).toLocaleString('en-US'):''}"
             oninput="formatAmountInput(this); recalcSplit()"
             class="w-28 p-3 bg-slate-50 rounded-xl ring-1 ring-slate-100 focus:ring-2 focus:ring-blue-400 outline-none text-sm font-bold text-blue-600 amount-input">
-        <button onclick="document.getElementById('${id}').remove();recalcSplit()" class="text-slate-300 hover:text-rose-400 text-xl leading-none flex-shrink-0">×</button>`;
+        <button onclick="document.getElementById('${id}').remove(); recalcSplit()" class="text-slate-300 hover:text-rose-400 text-xl leading-none flex-shrink-0">×</button>`;
     document.getElementById('participantRows').appendChild(row);
     recalcSplit();
 }
@@ -499,45 +508,43 @@ function recalcSplit() {
     let assigned=0; rows.forEach(r=>{ assigned+=parse(r.querySelector('.amount-input').value); });
     const diff=total-assigned;
     summary.classList.remove('hidden');
-    summary.innerHTML=`<p>ຈຳນວນ: <strong>${fmt(assigned)} ກີບ</strong> / ${fmt(total)} ກີບ</p>${Math.abs(diff)>1?`<p class="text-amber-600">⚠ ຕ່າງ ${fmt(Math.abs(diff))} ກີບ</p>`:'<p class="text-emerald-600">✓ ຖືກຕ້ອງ</p>'}`;
+    summary.innerHTML=`<p>ລວມ: <strong>${fmt(assigned)} ກີບ</strong> / ${fmt(total)} ກີບ</p>${Math.abs(diff)>1?`<p class="text-amber-600">⚠ ຕ່າງ ${fmt(Math.abs(diff))} ກີບ</p>`:'<p class="text-emerald-600">✓ ຖືກຕ້ອງ</p>'}`;
 }
-async function saveSplitBill() {
+function saveSplitBill() {
     const title=document.getElementById('splitTitle').value||'ບໍ່ມີຊື່';
     const total=parse(document.getElementById('splitTotal').value);
     const rows=document.querySelectorAll('#participantRows > div');
     if (!rows.length||!total) return;
-    const {data:bill}=await db.from('split_bills').insert({user_id:userId,title,total_amount:total}).select().single();
+    const participants=[];
+    rows.forEach(r=>{ const n=r.querySelector('.name-input').value||'ໝູ່', a=parse(r.querySelector('.amount-input').value); if(a>0) participants.push({id:uid(),name:n,amount_owed:a,paid:false}); });
+    splitBills.unshift({id:uid(),title,total_amount:total,date:new Date().toISOString(),participants});
+    saveSplit(); closeSplitModal(); renderSplit();
+}
+function togglePaid(billId, participantId) {
+    const bill=splitBills.find(b=>b.id===billId);
     if (!bill) return;
-    const parts=[];
-    rows.forEach(r=>{ const n=r.querySelector('.name-input').value||'ໝູ່', a=parse(r.querySelector('.amount-input').value); if(a>0) parts.push({bill_id:bill.id,name:n,amount_owed:a,paid:false}); });
-    if (parts.length) await db.from('split_participants').insert(parts);
-    closeSplitModal(); loadSplitBills();
+    const p=bill.participants.find(p=>p.id===participantId);
+    if (p) { p.paid=!p.paid; }
+    saveSplit(); renderSplit();
+    const allPaid=splitBills.some(b=>b.participants?.length&&b.participants.every(p=>p.paid));
+    if (allPaid) fireConfetti();
 }
-async function togglePaid(pid, current) {
-    await db.from('split_participants').update({paid:!current}).eq('id',pid);
-    await loadSplitBills();
-    if (!current) {
-        const anyAllPaid=splitBills.some(b=>b.split_participants?.length&&b.split_participants.every(p=>p.paid));
-        if (anyAllPaid) fireConfetti();
-    }
-}
-async function deleteSplitBill(id) {
+function deleteSplitBill(id) {
     if (!confirm('ລຶບບິນນີ້?')) return;
-    await db.from('split_participants').delete().eq('bill_id',id);
-    await db.from('split_bills').delete().eq('id',id);
-    loadSplitBills();
+    splitBills=splitBills.filter(b=>b.id!==id);
+    saveSplit(); renderSplit();
 }
 function renderSplit() {
     const list=document.getElementById('splitList'), empty=document.getElementById('emptySplit');
     let tFor=0,tUnpaid=0,tPaid=0;
-    splitBills.forEach(b=>(b.split_participants||[]).forEach(p=>{ const a=Number(p.amount_owed)||0; tFor+=a; p.paid?tPaid+=a:tUnpaid+=a; }));
+    splitBills.forEach(b=>(b.participants||[]).forEach(p=>{ const a=Number(p.amount_owed)||0; tFor+=a; p.paid?tPaid+=a:tUnpaid+=a; }));
     document.getElementById('totalPaidFor').innerText=fmt(tFor)+' ກີບ';
     document.getElementById('totalUnpaid').innerText=fmt(tUnpaid)+' ກີບ';
     document.getElementById('totalPaid').innerText=fmt(tPaid)+' ກີບ';
     if (!splitBills.length) { list.innerHTML=''; empty.classList.remove('hidden'); return; }
     empty.classList.add('hidden');
     list.innerHTML=splitBills.map(bill=>{
-        const parts=bill.split_participants||[], paidCount=parts.filter(p=>p.paid).length, allPaid=paidCount===parts.length&&parts.length>0;
+        const parts=bill.participants||[], paidCount=parts.filter(p=>p.paid).length, allPaid=paidCount===parts.length&&parts.length>0;
         return `<div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
             <div class="p-4 flex justify-between items-start">
                 <div><p class="font-bold text-slate-800">${bill.title||'ບໍ່ມີຊື່'}</p><p class="text-[10px] text-slate-400 mt-0.5">${fmt(bill.total_amount)} ກີບ · ${parts.length} ຄົນ</p></div>
@@ -554,7 +561,10 @@ function renderSplit() {
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="text-sm font-bold ${p.paid?'text-emerald-400 line-through opacity-50':'text-slate-700'}">${fmt(p.amount_owed)} ກີບ</span>
-                        <button onclick="togglePaid('${p.id}',${p.paid})" class="text-[10px] font-bold px-3 py-1.5 rounded-xl transition ${p.paid?'bg-emerald-50 text-emerald-600 hover:bg-rose-50 hover:text-rose-500':'bg-blue-50 text-blue-600 hover:bg-blue-100'}">${p.paid?'✓ ຈ່າຍ':'ໝາຍຈ່າຍ'}</button>
+                        <button onclick="togglePaid('${bill.id}','${p.id}')"
+                            class="text-[10px] font-bold px-3 py-1.5 rounded-xl transition ${p.paid?'bg-emerald-50 text-emerald-600 hover:bg-rose-50 hover:text-rose-500':'bg-blue-50 text-blue-600 hover:bg-blue-100'}">
+                            ${p.paid?'✓ ຈ່າຍ':'ໝາຍຈ່າຍ'}
+                        </button>
                     </div>
                 </div>`).join('')}
             </div>
@@ -562,7 +572,7 @@ function renderSplit() {
     }).join('');
 }
 
-// ── Modals & Tabs ───────────────────────────────────────────────────────
+// ── Tabs & Modals ─────────────────────────────────────────────────────
 function switchTab(tab) {
     ['budget','ai','split'].forEach(t=>{
         document.getElementById('page-'+t).classList.toggle('hidden',t!==tab);
@@ -608,8 +618,11 @@ function renderChart() {
     chartInstance=new Chart(ctx,{type:'doughnut',data:{labels:Object.keys(dm),datasets:[{data:Object.values(dm),backgroundColor:['#3b82f6','#8b5cf6','#ec4899','#f43f5e','#f59e0b','#10b981','#64748b','#06b6d4','#84cc16'],borderWidth:0}]},options:{maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{family:'Noto Sans Lao',size:11}}}}}});
 }
 
-// ── Init ─────────────────────────────────────────────────────────────
-setFilter('month'); loadTransactions(); loadSplitBills(); updateCategories();
+// ── Init ──────────────────────────────────────────────────────────────
+setFilter('month');
+updateCategories();
+renderBudget();
+renderSplit();
 </script>
 </body>
 </html>
